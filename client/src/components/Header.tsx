@@ -2,6 +2,12 @@ import { Heart, Sun, Moon, MoreVertical, List, LayoutGrid, Grid3X3 } from 'lucid
 import { useTheme } from '@/contexts/ThemeContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -11,12 +17,30 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
   const { wishlistItems, gridView, setGridView } = useWishlist();
 
+  const getCurrentGridIcon = () => {
+    switch (gridView) {
+      case 'list': return <List className="w-4 h-4" />;
+      case 'grid-2': return <LayoutGrid className="w-4 h-4" />;
+      case 'grid-3': return <Grid3X3 className="w-4 h-4" />;
+      default: return <List className="w-4 h-4" />;
+    }
+  };
+
   const getGridIcon = (view: string) => {
     switch (view) {
       case 'list': return <List className="w-4 h-4" />;
       case 'grid-2': return <LayoutGrid className="w-4 h-4" />;
       case 'grid-3': return <Grid3X3 className="w-4 h-4" />;
       default: return <List className="w-4 h-4" />;
+    }
+  };
+
+  const getGridLabel = (view: string) => {
+    switch (view) {
+      case 'list': return 'List View';
+      case 'grid-2': return '2 Column Grid';
+      case 'grid-3': return '3 Column Grid';
+      default: return 'List View';
     }
   };
 
@@ -37,25 +61,34 @@ export function Header({ onMenuClick }: HeaderProps) {
           </div>
           
           <div className="flex items-center space-x-3">
-            {/* View Toggle */}
-            <div className="flex bg-gray-100 dark:bg-slate-700 rounded-lg p-1 theme-transition">
-              {(['list', 'grid-2', 'grid-3'] as const).map((view) => (
+            {/* Grid View Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
-                  key={view}
                   variant="ghost"
                   size="sm"
-                  onClick={() => setGridView(view)}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                    gridView === view
-                      ? 'bg-white dark:bg-slate-600 text-primary-500 shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-primary-500'
-                  }`}
-                  data-testid={`button-view-${view}`}
+                  className="p-2 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:text-primary-500 transition-all theme-transition"
+                  data-testid="button-grid-view-toggle"
                 >
-                  {getGridIcon(view)}
+                  {getCurrentGridIcon()}
                 </Button>
-              ))}
-            </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40" data-testid="grid-view-dropdown">
+                {(['list', 'grid-2', 'grid-3'] as const).map((view) => (
+                  <DropdownMenuItem
+                    key={view}
+                    onClick={() => setGridView(view)}
+                    className={`flex items-center space-x-2 cursor-pointer ${
+                      gridView === view ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600' : ''
+                    }`}
+                    data-testid={`dropdown-view-${view}`}
+                  >
+                    {getGridIcon(view)}
+                    <span>{getGridLabel(view)}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             {/* Theme Toggle */}
             <Button

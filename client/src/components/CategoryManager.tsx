@@ -53,7 +53,7 @@ export function CategoryManager({ isOpen, onClose }: CategoryManagerProps) {
           description: "Category has been updated successfully",
         });
       } else {
-        await addCategory(formData);
+        await addCategory({ ...formData, isDefault: false });
         toast({
           title: "Category added",
           description: "New category has been added successfully",
