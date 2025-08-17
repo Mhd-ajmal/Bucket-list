@@ -8,6 +8,7 @@ import { WishlistItem } from '@/components/WishlistItem';
 import { AddItemModal } from '@/components/AddItemModal';
 import { CategoryManager } from '@/components/CategoryManager';
 import { MenuModal } from '@/components/MenuModal';
+import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 
 export function Home() {
@@ -108,6 +109,8 @@ export function Home() {
         isOpen={showMenuModal}
         onClose={() => setShowMenuModal(false)}
       />
+
+      <Footer />
     </div>
   );
 }

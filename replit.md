@@ -74,3 +74,24 @@ Preferred communication style: Simple, everyday language.
 
 ### Service Worker
 - Custom service worker implementation for offline caching and PWA functionality, with manual registration and update handling
+
+## Recent Updates (January 2025)
+
+### Currency Selection Feature
+- Added comprehensive currency selection system with 20+ popular currencies (USD, EUR, GBP, JPY, etc.)
+- Implemented dynamic currency symbol display in price inputs and item formatting
+- Global currency preference saved in app settings for future items
+- Currency dropdown in add item form with symbol and code display
+
+### Enhanced Emoji Selection
+- Expanded emoji collection to 400+ latest iOS emojis organized by categories
+- Categories include: Smileys & People, Animals & Nature, Food & Drink, Travel & Places, Objects & Technology, Activities & Sports, Hearts & Love, Symbols & Misc
+- Scrollable emoji picker interface with 12-column grid layout
+- Includes newest iOS emojis like 🫠, 🫡, 🫢, 🫣, 🐻‍❄️, 🫐, 🪸, and many more
+- Manual emoji input option preserved for custom selections
+
+### UI/UX Improvements
+- Added inspirational footer with "Inshallah all the dreams are come true" message and creator credit
+- Fixed duplicate emoji key warnings in React components
+- Improved scrollable emoji picker with visual feedback and counter
+- Enhanced mobile-first responsive design throughout the application
