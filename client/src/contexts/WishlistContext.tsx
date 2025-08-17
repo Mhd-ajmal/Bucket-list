@@ -9,6 +9,7 @@ interface WishlistContextType {
   settings: AppSettings | undefined;
   selectedCategory: string | undefined;
   gridView: 'list' | 'grid-2' | 'grid-3';
+  currency: string;
   
   // Category methods
   addCategory: (category: Omit<Category, 'id' | 'createdAt'>) => Promise<void>;
@@ -37,6 +38,7 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [selectedCategory, setSelectedCategoryState] = useState<string | undefined>();
   const [gridView, setGridViewState] = useState<'list' | 'grid-2' | 'grid-3'>('list');
+  const [currency, setCurrencyState] = useState<string>('USD');
 
   // Live queries
   const categories = useLiveQuery(() => db.categories.orderBy('createdAt').toArray()) || [];
@@ -53,6 +55,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     if (settings) {
       setSelectedCategoryState(settings.selectedCategoryId);
       setGridViewState(settings.gridView);
+      setCurrencyState(settings.currency || 'USD');
     }
   }, [settings]);
 
@@ -124,7 +127,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     if (currentSettings) {
       await db.appSettings.update(currentSettings.theme, updates);
     } else {
-      await db.appSettings.add({ theme: 'light', gridView: 'list', ...updates });
+      await db.appSettings.add({ theme: 'light', gridView: 'list', currency: 'USD', ...updates });
     }
   };
 
@@ -164,6 +167,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     settings,
     selectedCategory,
     gridView,
+    currency,
     addCategory,
     updateCategory,
     deleteCategory,

@@ -26,6 +26,7 @@ export const appSettingsSchema = z.object({
   theme: z.enum(['light', 'dark']).default('light'),
   gridView: z.enum(['list', 'grid-2', 'grid-3']).default('list'),
   selectedCategoryId: z.string().optional(),
+  currency: z.string().default('USD'),
 });
 
 export type Category = z.infer<typeof categorySchema>;

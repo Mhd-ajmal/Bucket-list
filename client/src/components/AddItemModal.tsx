@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { CURRENCIES, getCurrencySymbol } from '@/lib/currencies';
 
 interface AddItemModalProps {
   isOpen: boolean;
@@ -17,7 +18,7 @@ interface AddItemModalProps {
 }
 
 export function AddItemModal({ isOpen, onClose, editingItem }: AddItemModalProps) {
-  const { categories, addWishlistItem, updateWishlistItem } = useWishlist();
+  const { categories, addWishlistItem, updateWishlistItem, currency, updateSettings } = useWishlist();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -27,6 +28,7 @@ export function AddItemModal({ isOpen, onClose, editingItem }: AddItemModalProps
     price: editingItem?.price?.toString() || '',
     notes: editingItem?.notes || '',
     categoryId: editingItem?.categoryId || (categories[0]?.id || ''),
+    currency: currency,
   });
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -116,6 +118,11 @@ export function AddItemModal({ isOpen, onClose, editingItem }: AddItemModalProps
         });
       }
 
+      // Update global currency setting if changed
+      if (formData.currency !== currency) {
+        await updateSettings({ currency: formData.currency });
+      }
+
       handleClose();
     } catch (error) {
       toast({
@@ -135,6 +142,7 @@ export function AddItemModal({ isOpen, onClose, editingItem }: AddItemModalProps
       price: '',
       notes: '',
       categoryId: categories[0]?.id || '',
+      currency: currency,
     });
     setSelectedImage(null);
     setImagePreview(null);
@@ -150,6 +158,7 @@ export function AddItemModal({ isOpen, onClose, editingItem }: AddItemModalProps
         price: editingItem.price?.toString() || '',
         notes: editingItem.notes || '',
         categoryId: editingItem.categoryId,
+        currency: currency,
       });
       
       if (editingItem.imageBlob) {
@@ -280,20 +289,40 @@ export function AddItemModal({ isOpen, onClose, editingItem }: AddItemModalProps
             <Label htmlFor="price" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Price
             </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
-                $
-              </span>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                className="pl-8"
-                placeholder="0.00"
-                data-testid="input-price"
-              />
+            <div className="flex space-x-2">
+              <div className="flex-1 relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                  {getCurrencySymbol(formData.currency)}
+                </span>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                  className="pl-8"
+                  placeholder="0.00"
+                  data-testid="input-price"
+                />
+              </div>
+              <Select
+                value={formData.currency}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
+              >
+                <SelectTrigger className="w-32" data-testid="select-currency">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {CURRENCIES.map((curr) => (
+                    <SelectItem key={curr.code} value={curr.code} data-testid={`currency-option-${curr.code}`}>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-mono text-sm">{curr.symbol}</span>
+                        <span className="text-xs text-gray-500">{curr.code}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           

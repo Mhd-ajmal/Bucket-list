@@ -5,6 +5,7 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
+import { formatPrice } from '@/lib/currencies';
 
 interface WishlistItemProps {
   item: WishlistItemType;
@@ -12,7 +13,7 @@ interface WishlistItemProps {
 }
 
 export function WishlistItem({ item, onEdit }: WishlistItemProps) {
-  const { categories, deleteWishlistItem } = useWishlist();
+  const { categories, deleteWishlistItem, currency } = useWishlist();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const category = categories.find(c => c.id === item.categoryId);
@@ -37,13 +38,7 @@ export function WishlistItem({ item, onEdit }: WishlistItemProps) {
     }
   };
 
-  const formatPrice = (price?: number) => {
-    if (price === undefined || price === null) return null;
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(price);
-  };
+  const formattedPrice = formatPrice(item.price, currency);
 
   const noteCount = item.notes ? item.notes.split('\n').filter(line => line.trim()).length : 0;
 
@@ -110,9 +105,9 @@ export function WishlistItem({ item, onEdit }: WishlistItemProps) {
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors line-clamp-2" data-testid="item-title">
             {item.title}
           </h3>
-          {formatPrice(item.price) && (
+          {formattedPrice && (
             <span className="text-xl font-bold text-primary-500 ml-2" data-testid="item-price">
-              {formatPrice(item.price)}
+              {formattedPrice}
             </span>
           )}
         </div>

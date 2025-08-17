@@ -62,7 +62,8 @@ export class BukedListDB extends Dexie {
       await this.appSettings.add({
         theme: 'light',
         gridView: 'list',
-        selectedCategoryId: undefined
+        selectedCategoryId: undefined,
+        currency: 'USD'
       });
     }
   }
