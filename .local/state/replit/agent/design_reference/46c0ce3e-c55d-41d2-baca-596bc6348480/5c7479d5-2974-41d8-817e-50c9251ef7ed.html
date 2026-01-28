@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buked List - Your Personal Wishlist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#EEF2FF',
+                            500: '#6366F1',
+                            600: '#5B21B6',
+                            700: '#4C1D95'
+                        },
+                        secondary: {
+                            500: '#F59E0B',
+                            600: '#D97706'
+                        }
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-in-out',
+                        'bounce-gentle': 'bounceGentle 0.6s ease-in-out'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.05)' }
+                        }
+                    }
+                }
+            },
+            darkMode: 'class'
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .theme-transition {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .grid-animation {
+            transition: all 0.3s ease;
+        }
+        
+        .category-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .category-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .category-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .dark .category-scroll::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        
+        .drag-handle {
+            cursor: grab;
+        }
+        
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        
+        .item-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .fab-shadow {
+            box-shadow: 0 8px 25px -8px rgba(99, 102, 241, 0.6);
+        }
+        
+        .dark .fab-shadow {
+            box-shadow: 0 8px 25px -8px rgba(129, 140, 248, 0.4);
+        }
+    </style>
+</head>
+
+<body class="font-inter bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 theme-transition min-h-screen">
+    <!-- @COMPONENT: PWA Install Banner -->
+    <div id="install-banner" class="hidden fixed top-0 left-0 right-0 bg-primary-500 text-white p-4 z-50 shadow-lg">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-download text-lg"></i>
+                <span class="font-medium">Install Buked List for a better experience!</span>
+            </div>
+            <div class="space-x-2">
+                <button class="bg-white text-primary-500 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors">
+                    Install
+                </button>
+                <button class="text-white/80 hover:text-white text-lg">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: PWA Install Banner -->
+
+    <!-- @COMPONENT: Header -->
+    <header class="bg-white dark:bg-slate-800 shadow-sm theme-transition sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-heart text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Buked List</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" data-bind="itemCount">12 items saved</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <!-- View Toggle -->
+                    <div class="flex bg-gray-100 dark:bg-slate-700 rounded-lg p-1 theme-transition">
+                        <button data-view="list" class="view-toggle px-3 py-2 rounded-md text-sm font-medium bg-white dark:bg-slate-600 text-primary-500 shadow-sm transition-all">
+                            <i class="fas fa-list"></i>
+                        </button>
+                        <button data-view="grid-2" class="view-toggle px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-500 transition-all">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button data-view="grid-3" class="view-toggle px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-500 transition-all">
+                            <i class="fas fa-th"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:text-primary-500 transition-all theme-transition">
+                        <i class="fas fa-sun dark:hidden"></i>
+                        <i class="fas fa-moon hidden dark:inline"></i>
+                    </button>
+                    
+                    <!-- Menu Button -->
+                    <button class="p-2 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:text-primary-500 transition-all theme-transition" data-event="click:openMenu">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <!-- @COMPONENT: Category Navigation -->
+    <div class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 theme-transition">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Categories</h2>
+                <button class="text-primary-500 hover:text-primary-600 font-medium text-sm flex items-center space-x-1 transition-colors" data-event="click:openCategoryManager">
+                    <i class="fas fa-cog text-xs"></i>
+                    <span>Manage</span>
+                </button>
+            </div>
+            
+            <div class="category-scroll overflow-x-auto">
+                <div class="flex space-x-3 pb-2">
+                    <!-- @MAP: categories.map(category => ( -->
+                    <button class="category-pill flex-shrink-0 bg-primary-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 transition-all hover:bg-primary-600" data-category="all">
+                        <span>🌟</span>
+                        <span>All Items</span>
+                        <span class="bg-white/20 text-xs px-2 py-0.5 rounded-full" data-bind="category.count">12</span>
+                    </button>
+                    
+                    <button class="category-pill flex-shrink-0 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 transition-all hover:bg-gray-200 dark:hover:bg-slate-600 theme-transition" data-category="electronics">
+                        <span>📱</span>
+                        <span>Electronics</span>
+                        <span class="bg-gray-200 dark:bg-slate-600 text-xs px-2 py-0.5 rounded-full">4</span>
+                    </button>
+                    
+                    <button class="category-pill flex-shrink-0 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 transition-all hover:bg-gray-200 dark:hover:bg-slate-600 theme-transition" data-category="fashion">
+                        <span>👗</span>
+                        <span>Fashion</span>
+                        <span class="bg-gray-200 dark:bg-slate-600 text-xs px-2 py-0.5 rounded-full">3</span>
+                    </button>
+                    
+                    <button class="category-pill flex-shrink-0 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 transition-all hover:bg-gray-200 dark:hover:bg-slate-600 theme-transition" data-category="home">
+                        <span>🏠</span>
+                        <span>Home & Garden</span>
+                        <span class="bg-gray-200 dark:bg-slate-600 text-xs px-2 py-0.5 rounded-full">2</span>
+                    </button>
+                    
+                    <button class="category-pill flex-shrink-0 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-full text-sm font-medium flex items-center space-x-2 transition-all hover:bg-gray-200 dark:hover:bg-slate-600 theme-transition" data-category="books">
+                        <span>📚</span>
+                        <span>Books</span>
+                        <span class="bg-gray-200 dark:bg-slate-600 text-xs px-2 py-0.5 rounded-full">3</span>
+                    </button>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: Category Navigation -->
+
+    <!-- @COMPONENT: Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Empty State (Hidden when items exist) -->
+        <div id="empty-state" class="hidden text-center py-16">
+            <div class="max-w-sm mx-auto">
+                <div class="w-24 h-24 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-6 theme-transition">
+                    <i class="fas fa-heart text-4xl text-gray-400 dark:text-gray-500"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Your wishlist is empty</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-8">Start adding items you want to remember or buy later.</p>
+                <button class="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-colors" data-event="click:openAddForm">
+                    Add Your First Item
+                </button>
+            </div>
+        </div>
+
+        <!-- Wishlist Items Grid -->
+        <div id="items-grid" class="grid gap-6 grid-animation" data-view="list">
+            <!-- @MAP: wishlistItems.map(item => ( -->
+            <!-- @COMPONENT: Wishlist Item Card -->
+            <div class="item-card bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-all theme-transition group" data-mock="true">
+                <div class="relative">
+                    <!-- Mock image for a high-end laptop -->
+                    <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                         alt="MacBook Pro laptop" 
+                         class="w-full h-48 object-cover rounded-t-xl" data-mock-image="true" />
+                    
+                    <div class="absolute top-3 left-3">
+                        <span class="bg-black/50 text-white px-2 py-1 rounded-full text-xs font-medium">📱 Electronics</span>
+                    </div>
+                    
+                    <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="flex space-x-2">
+                            <button class="drag-handle bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors">
+                                <i class="fas fa-grip-vertical text-sm"></i>
+                            </button>
+                            <button class="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors" data-event="click:editItem">
+                                <i class="fas fa-edit text-sm"></i>
+                            </button>
+                            <button class="bg-red-500/80 text-white p-2 rounded-full hover:bg-red-600 transition-colors" data-event="click:deleteItem">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-5">
+                    <div class="flex items-start justify-between mb-3">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors" data-bind="item.title">
+                            MacBook Pro 16" M3 Max
+                        </h3>
+                        <span class="text-xl font-bold text-primary-500" data-bind="item.price">$3,999</span>
+                    </div>
+                    
+                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2" data-bind="item.description" data-mock="true">
+                        The most powerful MacBook Pro ever, featuring the M3 Max chip with incredible performance for professional workflows.
+                    </p>
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-calendar text-xs"></i>
+                            <span data-bind="item.dateAdded">Added 2 days ago</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-sticky-note text-xs"></i>
+                            <span data-bind="item.notesCount">3 notes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Second item - Fashion example -->
+            <div class="item-card bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-all theme-transition group" data-mock="true">
+                <div class="relative">
+                    <!-- Mock image for designer sneakers -->
+                    <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                         alt="Designer sneakers" 
+                         class="w-full h-48 object-cover rounded-t-xl" data-mock-image="true" />
+                    
+                    <div class="absolute top-3 left-3">
+                        <span class="bg-black/50 text-white px-2 py-1 rounded-full text-xs font-medium">👗 Fashion</span>
+                    </div>
+                    
+                    <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="flex space-x-2">
+                            <button class="drag-handle bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors">
+                                <i class="fas fa-grip-vertical text-sm"></i>
+                            </button>
+                            <button class="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors" data-event="click:editItem">
+                                <i class="fas fa-edit text-sm"></i>
+                            </button>
+                            <button class="bg-red-500/80 text-white p-2 rounded-full hover:bg-red-600 transition-colors" data-event="click:deleteItem">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-5">
+                    <div class="flex items-start justify-between mb-3">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors" data-bind="item.title">
+                            Nike Air Jordan 1 Retro
+                        </h3>
+                        <span class="text-xl font-bold text-primary-500" data-bind="item.price">$170</span>
+                    </div>
+                    
+                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2" data-bind="item.description" data-mock="true">
+                        Classic basketball shoes with premium leather construction and iconic design. Perfect for both casual wear and collection.
+                    </p>
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-calendar text-xs"></i>
+                            <span data-bind="item.dateAdded">Added 1 week ago</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-sticky-note text-xs"></i>
+                            <span data-bind="item.notesCount">1 note</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Third item - Home example -->
+            <div class="item-card bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-all theme-transition group" data-mock="true">
+                <div class="relative">
+                    <!-- Mock image for coffee maker -->
+                    <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                         alt="Espresso coffee maker" 
+                         class="w-full h-48 object-cover rounded-t-xl" data-mock-image="true" />
+                    
+                    <div class="absolute top-3 left-3">
+                        <span class="bg-black/50 text-white px-2 py-1 rounded-full text-xs font-medium">🏠 Home & Garden</span>
+                    </div>
+                    
+                    <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="flex space-x-2">
+                            <button class="drag-handle bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors">
+                                <i class="fas fa-grip-vertical text-sm"></i>
+                            </button>
+                            <button class="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors" data-event="click:editItem">
+                                <i class="fas fa-edit text-sm"></i>
+                            </button>
+                            <button class="bg-red-500/80 text-white p-2 rounded-full hover:bg-red-600 transition-colors" data-event="click:deleteItem">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-5">
+                    <div class="flex items-start justify-between mb-3">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors" data-bind="item.title">
+                            Breville Barista Express
+                        </h3>
+                        <span class="text-xl font-bold text-primary-500" data-bind="item.price">$699</span>
+                    </div>
+                    
+                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2" data-bind="item.description" data-mock="true">
+                        Semi-automatic espresso machine with built-in grinder. Perfect for creating café-quality coffee at home with precision control.
+                    </p>
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-calendar text-xs"></i>
+                            <span data-bind="item.dateAdded">Added 3 days ago</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-sticky-note text-xs"></i>
+                            <span data-bind="item.notesCount">2 notes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_MAP )) -->
+        </div>
+        <!-- @END_COMPONENT: Wishlist Item Card -->
+    </main>
+    <!-- @END_COMPONENT: Main Content -->
+
+    <!-- @COMPONENT: Floating Action Button -->
+    <div class="fixed bottom-6 right-6 z-30">
+        <button class="bg-primary-500 hover:bg-primary-600 text-white w-16 h-16 rounded-full shadow-lg fab-shadow hover:shadow-xl transition-all animate-bounce-gentle" data-event="click:openAddForm">
+            <i class="fas fa-plus text-xl"></i>
+        </button>
+    </div>
+    <!-- @END_COMPONENT: Floating Action Button -->
+
+    <!-- @COMPONENT: Add Item Modal -->
+    <div id="add-item-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto theme-transition animate-slide-up">
+            <div class="sticky top-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 p-6 theme-transition">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Add New Item</h2>
+                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" data-event="click:closeModal">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6 space-y-6">
+                <!-- Image Upload -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Item Image</label>
+                    <div class="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-8 text-center hover:border-primary-500 transition-colors theme-transition">
+                        <i class="fas fa-image text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-600 dark:text-gray-400 mb-2">Drag & drop an image or click to browse</p>
+                        <input type="file" accept="image/*" class="hidden" id="image-upload" data-implementation="Should handle file upload and store in IndexedDB">
+                        <button type="button" class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                            Choose File
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Title -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title *</label>
+                    <input type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white theme-transition" placeholder="Enter item title" required>
+                </div>
+                
+                <!-- Category -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                    <select class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white theme-transition">
+                        <option value="electronics">📱 Electronics</option>
+                        <option value="fashion">👗 Fashion</option>
+                        <option value="home">🏠 Home & Garden</option>
+                        <option value="books">📚 Books</option>
+                    </select>
+                </div>
+                
+                <!-- Price -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Price</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+                        <input type="number" step="0.01" class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white theme-transition" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+                    <textarea rows="3" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white theme-transition resize-none" placeholder="Add a description..."></textarea>
+                </div>
+                
+                <!-- Notes -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes</label>
+                    <textarea rows="2" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white theme-transition resize-none" placeholder="Personal notes..."></textarea>
+                </div>
+            </div>
+            
+            <div class="sticky bottom-0 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 p-6 theme-transition">
+                <div class="flex space-x-3">
+                    <button type="button" class="flex-1 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 py-3 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors theme-transition" data-event="click:closeModal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-lg font-medium transition-colors" data-event="click:saveItem" data-implementation="Should validate form and save to IndexedDB">
+                        Add Item
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: Add Item Modal -->
+
+    <!-- @COMPONENT: Category Manager Modal -->
+    <div id="category-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-xl w-full max-w-md max-h-[80vh] overflow-y-auto theme-transition animate-slide-up">
+            <div class="sticky top-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 p-6 theme-transition">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Manage Categories</h2>
+                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" data-event="click:closeCategoryModal">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="space-y-4">
+                    <!-- @MAP: categories.map(category => ( -->
+                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg theme-transition">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-2xl">📱</span>
+                            <div>
+                                <h3 class="font-medium text-gray-900 dark:text-white" data-bind="category.name">Electronics</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400" data-bind="category.itemCount">4 items</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="text-primary-500 hover:text-primary-600 transition-colors" data-event="click:editCategory">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="text-red-500 hover:text-red-600 transition-colors" data-event="click:deleteCategory">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+                
+                <button class="w-full mt-6 bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-lg font-medium transition-colors" data-event="click:addCategory">
+                    <i class="fas fa-plus mr-2"></i>
+                    Add New Category
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: Category Manager Modal -->
+
+    <!-- @COMPONENT: Menu Modal -->
+    <div id="menu-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-xl w-full max-w-sm theme-transition animate-slide-up">
+            <div class="p-6">
+                <div class="space-y-2">
+                    <button class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center space-x-3 theme-transition" data-event="click:exportData">
+                        <i class="fas fa-download text-primary-500"></i>
+                        <span class="text-gray-900 dark:text-white">Export Data</span>
+                    </button>
+                    <button class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center space-x-3 theme-transition" data-event="click:importData">
+                        <i class="fas fa-upload text-primary-500"></i>
+                        <span class="text-gray-900 dark:text-white">Import Data</span>
+                    </button>
+                    <button class="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center space-x-3 theme-transition" data-event="click:clearData">
+                        <i class="fas fa-trash text-red-500"></i>
+                        <span class="text-gray-900 dark:text-white">Clear All Data</span>
+                    </button>
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-slate-600">
+                    <button class="w-full bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 py-3 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors theme-transition" data-event="click:closeMenu">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: Menu Modal -->
+
+    <script>
+        (function() {
+            // TODO: Implement IndexedDB for persistent data storage
+            // TODO: Implement Service Worker for PWA functionality
+            // TODO: Implement drag and drop for item reordering
+            // TODO: Implement offline sync functionality
+            
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            // Load saved theme or default to light
+            const savedTheme = localStorage.getItem('buked-theme') || 'light';
+            if (savedTheme === 'dark') {
+                html.classList.add('dark');
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                html.classList.toggle('dark');
+                const isDark = html.classList.contains('dark');
+                localStorage.setItem('buked-theme', isDark ? 'dark' : 'light');
+                
+                // Animate theme toggle button
+                themeToggle.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    themeToggle.style.transform = 'scale(1)';
+                }, 150);
+            });
+            
+            // View toggle functionality
+            const viewToggleButtons = document.querySelectorAll('.view-toggle');
+            const itemsGrid = document.getElementById('items-grid');
+            
+            // Load saved view or default to list
+            const savedView = localStorage.getItem('buked-view') || 'list';
+            updateGridView(savedView);
+            
+            viewToggleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const view = button.dataset.view;
+                    
+                    // Update active state
+                    viewToggleButtons.forEach(btn => {
+                        btn.classList.remove('bg-white', 'dark:bg-slate-600', 'text-primary-500', 'shadow-sm');
+                        btn.classList.add('text-gray-600', 'dark:text-gray-300');
+                    });
+                    
+                    button.classList.add('bg-white', 'dark:bg-slate-600', 'text-primary-500', 'shadow-sm');
+                    button.classList.remove('text-gray-600', 'dark:text-gray-300');
+                    
+                    updateGridView(view);
+                    localStorage.setItem('buked-view', view);
+                });
+            });
+            
+            function updateGridView(view) {
+                itemsGrid.dataset.view = view;
+                
+                switch(view) {
+                    case 'list':
+                        itemsGrid.className = 'grid gap-6 grid-animation grid-cols-1';
+                        break;
+                    case 'grid-2':
+                        itemsGrid.className = 'grid gap-6 grid-animation grid-cols-1 sm:grid-cols-2';
+                        break;
+                    case 'grid-3':
+                        itemsGrid.className = 'grid gap-6 grid-animation grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+                        break;
+                }
+                
+                // Update active button state
+                viewToggleButtons.forEach(btn => {
+                    btn.classList.remove('bg-white', 'dark:bg-slate-600', 'text-primary-500', 'shadow-sm');
+                    btn.classList.add('text-gray-600', 'dark:text-gray-300');
+                });
+                
+                const activeButton = document.querySelector(`[data-view="${view}"]`);
+                if (activeButton) {
+                    activeButton.classList.add('bg-white', 'dark:bg-slate-600', 'text-primary-500', 'shadow-sm');
+                    activeButton.classList.remove('text-gray-600', 'dark:text-gray-300');
+                }
+            }
+            
+            // Category filter functionality
+            const categoryPills = document.querySelectorAll('.category-pill');
+            
+            categoryPills.forEach(pill => {
+                pill.addEventListener('click', () => {
+                    // Update active state
+                    categoryPills.forEach(p => {
+                        p.classList.remove('bg-primary-500', 'text-white');
+                        p.classList.add('bg-gray-100', 'dark:bg-slate-700', 'text-gray-700', 'dark:text-gray-300');
+                    });
+                    
+                    pill.classList.add('bg-primary-500', 'text-white');
+                    pill.classList.remove('bg-gray-100', 'dark:bg-slate-700', 'text-gray-700', 'dark:text-gray-300');
+                    
+                    // TODO: Filter items based on selected category
+                    const category = pill.dataset.category;
+                    console.log('Filter by category:', category);
+                });
+            });
+            
+            // Modal functionality
+            const addItemModal = document.getElementById('add-item-modal');
+            const categoryModal = document.getElementById('category-modal');
+            const menuModal = document.getElementById('menu-modal');
+            
+            // Add item modal
+            document.querySelector('[data-event="click:openAddForm"]').addEventListener('click', () => {
+                addItemModal.classList.remove('hidden');
+            });
+            
+            document.querySelector('[data-event="click:closeModal"]').addEventListener('click', () => {
+                addItemModal.classList.add('hidden');
+            });
+            
+            // Category modal
+            document.querySelector('[data-event="click:openCategoryManager"]').addEventListener('click', () => {
+                categoryModal.classList.remove('hidden');
+            });
+            
+            document.querySelector('[data-event="click:closeCategoryModal"]').addEventListener('click', () => {
+                categoryModal.classList.add('hidden');
+            });
+            
+            // Menu modal
+            document.querySelector('[data-event="click:openMenu"]').addEventListener('click', () => {
+                menuModal.classList.remove('hidden');
+            });
+            
+            document.querySelector('[data-event="click:closeMenu"]').addEventListener('click', () => {
+                menuModal.classList.add('hidden');
+            });
+            
+            // Close modals when clicking outside
+            [addItemModal, categoryModal, menuModal].forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            });
+            
+            // PWA Install Banner (basic simulation)
+            let deferredPrompt;
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById('install-banner').classList.remove('hidden');
+            });
+            
+            // TODO: Implement file upload functionality
+            // TODO: Implement form validation and submission
+            // TODO: Implement data export/import
+            // TODO: Implement search and filtering
+            // TODO: Implement offline data synchronization
+            
+            console.log('Buked List app initialized');
+        })();
+    </script>
+</body>
+</html>

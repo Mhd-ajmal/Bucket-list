@@ -1,0 +1,624 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buked List - Offline Wishlist App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            },
+            darkMode: 'class'
+        };
+    </script>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+</head>
+<body class="font-inter bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+    <!-- @COMPONENT: App [main container] -->
+    <div class="min-h-screen flex flex-col" id="app">
+        
+        <!-- @COMPONENT: Header [app bar with title and actions] -->
+        <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">B</span>
+                        </div>
+                        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Buked List</h1>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <!-- Search Button -->
+                        <button class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200" data-event="click:toggleSearch">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Theme Toggle -->
+                        <button class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200" id="themeToggle" data-event="click:toggleTheme">
+                            <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                            </svg>
+                            <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Menu Button -->
+                        <button class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200" data-event="click:toggleMenu">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- @END_COMPONENT: Header -->
+
+        <!-- @COMPONENT: CategoryFilter [horizontal scrollable category bar] -->
+        <div class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center space-x-3 py-3 overflow-x-auto scrollbar-hide" style="scrollbar-width: none; -ms-overflow-style: none;">
+                    <!-- @MAP: categories.map(category => ( -->
+                    <button class="flex-shrink-0 inline-flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-full text-sm font-medium transition-all duration-200" data-category="all" data-event="click:filterByCategory">
+                        <span>📋</span>
+                        <span data-bind="category.name">All Items</span>
+                        <span class="bg-primary-700 text-xs px-2 py-0.5 rounded-full" data-bind="category.count">12</span>
+                    </button>
+                    
+                    <button class="flex-shrink-0 inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-sm font-medium transition-all duration-200" data-category="electronics" data-event="click:filterByCategory">
+                        <span>📱</span>
+                        <span data-bind="category.name">Electronics</span>
+                        <span class="bg-gray-200 dark:bg-slate-600 text-xs px-2 py-0.5 rounded-full" data-bind="category.count">4</span>
+                    </button>
+                    
+                    <button class="flex-shrink-0 inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-sm font-medium transition-all duration-200" data-category="books" data-event="click:filterByCategory">
+                        <span>📚</span>
+                        <span data-bind="category.name">Books</span>
+                        <span class="bg-gray-200 dark:bg-slate-600 text-xs px-2 py-0.5 rounded-full" data-bind="category.count">3</span>
+                    </button>
+                    
+                    <button class="flex-shrink-0 inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-sm font-medium transition-all duration-200" data-category="fashion" data-event="click:filterByCategory">
+                        <span>👕</span>
+                        <span data-bind="category.name">Fashion</span>
+                        <span class="bg-gray-200 dark:bg-slate-600 text-xs px-2 py-0.5 rounded-full" data-bind="category.count">2</span>
+                    </button>
+                    
+                    <button class="flex-shrink-0 inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-sm font-medium transition-all duration-200" data-category="home" data-event="click:filterByCategory">
+                        <span>🏠</span>
+                        <span data-bind="category.name">Home</span>
+                        <span class="bg-gray-200 dark:bg-slate-600 text-xs px-2 py-0.5 rounded-full" data-bind="category.count">3</span>
+                    </button>
+                    
+                    <!-- Add Category Button -->
+                    <button class="flex-shrink-0 inline-flex items-center space-x-2 px-4 py-2 border-2 border-dashed border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-400 hover:border-primary-300 hover:text-primary-600 dark:hover:border-primary-400 dark:hover:text-primary-400 rounded-full text-sm font-medium transition-all duration-200" data-event="click:addCategory">
+                        <span>➕</span>
+                        <span>Add Category</span>
+                    </button>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: CategoryFilter -->
+
+        <!-- @COMPONENT: SearchBar [collapsible search input] -->
+        <div class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 transition-colors duration-300 hidden" id="searchBar">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                <div class="relative">
+                    <input type="text" placeholder="Search your wishlist..." class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200" data-bind="searchQuery" data-event="input:handleSearch">
+                    <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: SearchBar -->
+
+        <!-- @COMPONENT: MainContent [wishlist items grid] -->
+        <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-slate-700 transition-colors duration-300">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white" data-bind="stats.totalItems">12</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Total Items</div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-slate-700 transition-colors duration-300">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white" data-bind="stats.totalValue">$2,340</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Total Value</div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-slate-700 transition-colors duration-300">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white" data-bind="stats.categories">5</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Categories</div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-slate-700 transition-colors duration-300">
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400" data-bind="stats.offline">●</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Offline Ready</div>
+                </div>
+            </div>
+
+            <!-- Wishlist Items Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="wishlistGrid">
+                
+                <!-- @MAP: wishlistItems.map(item => ( -->
+                
+                <!-- Wishlist Item 1 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all duration-300 group" data-item-id="1" data-mock="true">
+                    <!-- Drag Handle -->
+                    <div class="flex items-center justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div class="flex space-x-1">
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                        </div>
+                        <button class="text-gray-400 hover:text-red-500 transition-colors duration-200" data-event="click:deleteItem" data-item-id="1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Item Image -->
+                    <!-- A sleek modern laptop computer on a clean white desk -->
+                    <div class="aspect-square bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                        <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" 
+                             alt="MacBook Pro 16-inch" 
+                             class="w-full h-full object-cover" 
+                             data-mock-image="true" 
+                             data-implementation="Use FileUpload component for user images" />
+                    </div>
+                    
+                    <!-- Item Details -->
+                    <div class="p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 dark:text-white text-lg leading-tight" data-bind="item.title">MacBook Pro 16"</h3>
+                            <span class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full" data-bind="item.category">📱</span>
+                        </div>
+                        
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2" data-bind="item.description">Latest MacBook Pro with M3 chip, perfect for development and creative work.</p>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xl font-bold text-gray-900 dark:text-white" data-bind="item.price">$2,499</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400" data-bind="item.dateAdded">Added 2 days ago</span>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button class="flex-1 px-3 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors duration-200" data-event="click:editItem" data-item-id="1">
+                                Edit
+                            </button>
+                            <button class="px-3 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors duration-200" data-event="click:viewNotes" data-item-id="1">
+                                Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wishlist Item 2 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all duration-300 group" data-item-id="2" data-mock="true">
+                    <div class="flex items-center justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div class="flex space-x-1">
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                        </div>
+                        <button class="text-gray-400 hover:text-red-500 transition-colors duration-200" data-event="click:deleteItem" data-item-id="2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- A collection of classic literature books stacked elegantly -->
+                    <div class="aspect-square bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                        <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" 
+                             alt="Classic Literature Collection" 
+                             class="w-full h-full object-cover" 
+                             data-mock-image="true" />
+                    </div>
+                    
+                    <div class="p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 dark:text-white text-lg leading-tight" data-bind="item.title">Classic Literature Set</h3>
+                            <span class="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full" data-bind="item.category">📚</span>
+                        </div>
+                        
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2" data-bind="item.description">Complete collection of timeless classics including Shakespeare, Dickens, and Austen.</p>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xl font-bold text-gray-900 dark:text-white" data-bind="item.price">$89</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400" data-bind="item.dateAdded">Added 1 week ago</span>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button class="flex-1 px-3 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors duration-200" data-event="click:editItem" data-item-id="2">
+                                Edit
+                            </button>
+                            <button class="px-3 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors duration-200" data-event="click:viewNotes" data-item-id="2">
+                                Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wishlist Item 3 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all duration-300 group" data-item-id="3" data-mock="true">
+                    <div class="flex items-center justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div class="flex space-x-1">
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                        </div>
+                        <button class="text-gray-400 hover:text-red-500 transition-colors duration-200" data-event="click:deleteItem" data-item-id="3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Stylish wireless headphones in modern minimalist setting -->
+                    <div class="aspect-square bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" 
+                             alt="Premium Wireless Headphones" 
+                             class="w-full h-full object-cover" 
+                             data-mock-image="true" />
+                    </div>
+                    
+                    <div class="p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 dark:text-white text-lg leading-tight" data-bind="item.title">Sony WH-1000XM5</h3>
+                            <span class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full" data-bind="item.category">📱</span>
+                        </div>
+                        
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2" data-bind="item.description">Industry-leading noise canceling headphones with exceptional sound quality.</p>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xl font-bold text-gray-900 dark:text-white" data-bind="item.price">$399</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400" data-bind="item.dateAdded">Added 3 days ago</span>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button class="flex-1 px-3 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors duration-200" data-event="click:editItem" data-item-id="3">
+                                Edit
+                            </button>
+                            <button class="px-3 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors duration-200" data-event="click:viewNotes" data-item-id="3">
+                                Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wishlist Item 4 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all duration-300 group" data-item-id="4" data-mock="true">
+                    <div class="flex items-center justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div class="flex space-x-1">
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                            <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                        </div>
+                        <button class="text-gray-400 hover:text-red-500 transition-colors duration-200" data-event="click:deleteItem" data-item-id="4">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Minimalist modern desk setup with ergonomic chair -->
+                    <div class="aspect-square bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                        <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=400" 
+                             alt="Ergonomic Office Chair" 
+                             class="w-full h-full object-cover" 
+                             data-mock-image="true" />
+                    </div>
+                    
+                    <div class="p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 dark:text-white text-lg leading-tight" data-bind="item.title">Herman Miller Chair</h3>
+                            <span class="text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full" data-bind="item.category">🏠</span>
+                        </div>
+                        
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2" data-bind="item.description">Premium ergonomic office chair for better posture and comfort during long work sessions.</p>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xl font-bold text-gray-900 dark:text-white" data-bind="item.price">$1,395</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400" data-bind="item.dateAdded">Added 5 days ago</span>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button class="flex-1 px-3 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors duration-200" data-event="click:editItem" data-item-id="4">
+                                Edit
+                            </button>
+                            <button class="px-3 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors duration-200" data-event="click:viewNotes" data-item-id="4">
+                                Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- @END_MAP )) -->
+
+                <!-- Empty State Card (when no items match filter) -->
+                <div class="col-span-full text-center py-12 hidden" id="emptyState">
+                    <div class="text-6xl mb-4">📝</div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No items in this category</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Start building your wishlist by adding your first item!</p>
+                    <button class="px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors duration-200" data-event="click:openAddModal">
+                        Add Your First Item
+                    </button>
+                </div>
+            </div>
+        </main>
+        <!-- @END_COMPONENT: MainContent -->
+
+        <!-- @COMPONENT: FloatingActionButton [add new item] -->
+        <button class="fixed bottom-6 right-6 w-14 h-14 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-40" data-event="click:openAddModal" data-implementation="Should open AddItemModal component">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+        </button>
+        <!-- @END_COMPONENT: FloatingActionButton -->
+
+        <!-- @COMPONENT: BottomNavigation [mobile navigation] -->
+        <nav class="md:hidden bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 transition-colors duration-300">
+            <div class="flex justify-around py-2">
+                <button class="flex flex-col items-center py-2 px-4 text-primary-600 dark:text-primary-400" data-event="click:navigateHome">
+                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13z"></path>
+                    </svg>
+                    <span class="text-xs">Home</span>
+                </button>
+                
+                <button class="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-400" data-event="click:navigateCategories">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                    <span class="text-xs">Categories</span>
+                </button>
+                
+                <button class="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-400" data-event="click:navigateStats">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span class="text-xs">Stats</span>
+                </button>
+                
+                <button class="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-400" data-event="click:navigateSettings">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="text-xs">Settings</span>
+                </button>
+            </div>
+        </nav>
+        <!-- @END_COMPONENT: BottomNavigation -->
+
+        <!-- @COMPONENT: Modal [add/edit item overlay] -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-end md:items-center justify-center z-50 hidden transition-opacity duration-300" id="addItemModal">
+            <div class="bg-white dark:bg-slate-800 w-full md:max-w-lg md:mx-4 rounded-t-xl md:rounded-xl shadow-xl transform transition-transform duration-300 translate-y-full md:translate-y-0" id="modalContent">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Add New Item</h2>
+                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200" data-event="click:closeModal">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Modal Body -->
+                <div class="p-6 space-y-4 max-h-96 md:max-h-none overflow-y-auto">
+                    <!-- Image Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Item Image</label>
+                        <div class="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-8 text-center hover:border-primary-300 dark:hover:border-primary-400 transition-colors duration-200" data-implementation="FileUpload component with image preview">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Tap to upload an image</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Title -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200" placeholder="Enter item title..." data-bind="form.title">
+                    </div>
+                    
+                    <!-- Category -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white transition-all duration-200" data-bind="form.category">
+                            <option value="">Select a category</option>
+                            <option value="electronics">📱 Electronics</option>
+                            <option value="books">📚 Books</option>
+                            <option value="fashion">👕 Fashion</option>
+                            <option value="home">🏠 Home</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Price -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Price</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500 dark:text-gray-400">$</span>
+                            <input type="number" class="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200" placeholder="0.00" data-bind="form.price">
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+                        <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 resize-none" placeholder="Describe the item..." data-bind="form.description"></textarea>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes (Optional)</label>
+                        <textarea rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 resize-none" placeholder="Any additional notes..." data-bind="form.notes"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Modal Footer -->
+                <div class="flex space-x-3 p-6 border-t border-gray-200 dark:border-slate-700">
+                    <button class="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-200" data-event="click:closeModal">
+                        Cancel
+                    </button>
+                    <button class="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200" data-event="click:saveItem" data-implementation="Should validate form and save to IndexedDB">
+                        Add Item
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Modal -->
+
+    </div>
+    <!-- @END_COMPONENT: App -->
+
+    <script>
+    // TODO: Implement business logic, API calls, and state management
+    (function() {
+        'use strict';
+        
+        // Theme management
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+        
+        // Initialize theme from localStorage or default to light
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        if (currentTheme === 'dark') {
+            htmlElement.classList.add('dark');
+        }
+        
+        // Theme toggle functionality
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                htmlElement.classList.toggle('dark');
+                const isDark = htmlElement.classList.contains('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                
+                // Add a subtle animation feedback
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        }
+        
+        // Search functionality
+        const searchBar = document.getElementById('searchBar');
+        document.querySelector('[data-event="click:toggleSearch"]')?.addEventListener('click', function() {
+            searchBar.classList.toggle('hidden');
+            if (!searchBar.classList.contains('hidden')) {
+                searchBar.querySelector('input').focus();
+            }
+        });
+        
+        // Modal functionality
+        const modal = document.getElementById('addItemModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        function openModal() {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('translate-y-full', 'md:translate-y-0');
+                modalContent.classList.add('translate-y-0');
+            }, 10);
+        }
+        
+        function closeModal() {
+            modalContent.classList.remove('translate-y-0');
+            modalContent.classList.add('translate-y-full', 'md:translate-y-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+        
+        // Add event listeners for modal
+        document.querySelector('[data-event="click:openAddModal"]')?.addEventListener('click', openModal);
+        document.querySelectorAll('[data-event="click:closeModal"]').forEach(btn => {
+            btn.addEventListener('click', closeModal);
+        });
+        
+        // Close modal on backdrop click
+        modal?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // Category filter functionality
+        document.querySelectorAll('[data-event="click:filterByCategory"]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active state from all category buttons
+                document.querySelectorAll('[data-event="click:filterByCategory"]').forEach(b => {
+                    b.classList.remove('bg-primary-600', 'text-white');
+                    b.classList.add('bg-gray-100', 'dark:bg-slate-700', 'text-gray-700', 'dark:text-gray-300');
+                });
+                
+                // Add active state to clicked button
+                this.classList.remove('bg-gray-100', 'dark:bg-slate-700', 'text-gray-700', 'dark:text-gray-300');
+                this.classList.add('bg-primary-600', 'text-white');
+                
+                // TODO: Filter wishlist items by category
+                console.log('Filter by category:', this.dataset.category);
+            });
+        });
+        
+        // Drag and drop placeholder
+        let draggedElement = null;
+        
+        document.querySelectorAll('[data-item-id]').forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                draggedElement = this;
+                this.style.opacity = '0.5';
+            });
+            
+            item.addEventListener('dragend', function(e) {
+                this.style.opacity = '1';
+                draggedElement = null;
+            });
+            
+            item.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+            
+            item.addEventListener('drop', function(e) {
+                e.preventDefault();
+                if (draggedElement && draggedElement !== this) {
+                    // TODO: Implement reordering logic
+                    console.log('Reorder items');
+                }
+            });
+        });
+        
+        // PWA install prompt (placeholder)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            deferredPrompt = e;
+            // TODO: Show custom install button
+        });
+        
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,645 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buked List - Your Wishlist Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        secondary: {
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="font-sans bg-gray-50 dark:bg-slate-900 transition-colors duration-300" data-theme="light">
+
+    <!-- @COMPONENT: AppHeader [theme toggle, title, actions] -->
+    <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-heart text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Buked List</h1>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <!-- Export/Import Button -->
+                    <button class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" data-event="click:showExportMenu">
+                        <i class="fas fa-download text-lg"></i>
+                    </button>
+                    
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" data-event="click:toggleTheme">
+                        <i class="fas fa-moon dark:hidden text-lg"></i>
+                        <i class="fas fa-sun hidden dark:block text-lg"></i>
+                    </button>
+                    
+                    <!-- Menu Button -->
+                    <button class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors md:hidden" data-event="click:toggleMobileMenu">
+                        <i class="fas fa-bars text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: AppHeader -->
+
+    <!-- @COMPONENT: CategoryFilter [horizontal scroll, category chips] -->
+    <div class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-sm font-medium text-gray-700 dark:text-gray-300">Categories</h2>
+                <button class="text-primary-500 hover:text-primary-600 text-sm font-medium" data-event="click:openCategoryManager">
+                    <i class="fas fa-cog mr-1"></i>Manage
+                </button>
+            </div>
+            
+            <!-- @MAP: categories.map(category => ( -->
+            <div class="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
+                <button class="flex-shrink-0 flex items-center space-x-2 px-4 py-2 bg-primary-500 text-white rounded-full text-sm font-medium transition-colors" data-bind="category.active">
+                    <span>🛍️</span>
+                    <span>All Items</span>
+                    <span class="bg-white/20 text-xs px-2 py-0.5 rounded-full" data-bind="category.count">12</span>
+                </button>
+                
+                <button class="flex-shrink-0 flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-sm font-medium transition-colors" data-bind="category.name">
+                    <span>📱</span>
+                    <span>Electronics</span>
+                    <span class="bg-gray-300 dark:bg-slate-500 text-xs px-2 py-0.5 rounded-full">4</span>
+                </button>
+                
+                <button class="flex-shrink-0 flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-sm font-medium transition-colors">
+                    <span>👕</span>
+                    <span>Fashion</span>
+                    <span class="bg-gray-300 dark:bg-slate-500 text-xs px-2 py-0.5 rounded-full">3</span>
+                </button>
+                
+                <button class="flex-shrink-0 flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-sm font-medium transition-colors">
+                    <span>🏠</span>
+                    <span>Home</span>
+                    <span class="bg-gray-300 dark:bg-slate-500 text-xs px-2 py-0.5 rounded-full">2</span>
+                </button>
+                
+                <button class="flex-shrink-0 flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-sm font-medium transition-colors">
+                    <span>📚</span>
+                    <span>Books</span>
+                    <span class="bg-gray-300 dark:bg-slate-500 text-xs px-2 py-0.5 rounded-full">3</span>
+                </button>
+            </div>
+            <!-- @END_MAP )) -->
+        </div>
+    </div>
+    <!-- @END_COMPONENT: CategoryFilter -->
+
+    <!-- @COMPONENT: MainContent [wishlist items, empty state] -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">My Wishlist</h2>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mt-1" data-bind="filteredItems.length">Showing 12 items in All Categories</p>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" data-event="click:toggleSortMenu" title="Sort">
+                    <i class="fas fa-sort text-lg"></i>
+                </button>
+                <button class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" data-event="click:toggleViewMode" title="Grid View">
+                    <i class="fas fa-th-large text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- @MAP: wishlistItems.map(item => ( -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="wishlistGrid">
+            <!-- Wishlist Item Card 1 -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all duration-200 group" data-mock="true" draggable="true">
+                <div class="relative">
+                    <!-- Modern wireless headphones with active noise cancellation -->
+                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300" alt="Wireless headphones" class="w-full h-48 object-cover" data-mock-image="true" />
+                    <div class="absolute top-3 left-3">
+                        <span class="bg-primary-500 text-white text-xs font-medium px-2 py-1 rounded-full">📱 Electronics</span>
+                    </div>
+                    <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm" data-event="click:editItem">
+                            <i class="fas fa-pencil text-gray-600 text-xs"></i>
+                        </button>
+                    </div>
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors cursor-grab active:cursor-grabbing"></div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2" data-bind="item.title">Sony WH-1000XM5 Headphones</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2" data-bind="item.description">Premium wireless headphones with industry-leading noise cancellation and exceptional sound quality.</p>
+                    
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="text-2xl font-bold text-primary-500" data-bind="item.price">$399.99</div>
+                        <div class="flex items-center space-x-1">
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" data-event="click:shareItem">
+                                <i class="fas fa-share text-gray-500 text-sm"></i>
+                            </button>
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-500" data-event="click:deleteItem">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 dark:text-gray-400" data-bind="item.notes">
+                        <i class="fas fa-sticky-note mr-1"></i>
+                        Check for Black Friday deals
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wishlist Item Card 2 -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all duration-200 group" data-mock="true" draggable="true">
+                <div class="relative">
+                    <!-- Elegant black designer handbag on white background -->
+                    <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300" alt="Designer handbag" class="w-full h-48 object-cover" data-mock-image="true" />
+                    <div class="absolute top-3 left-3">
+                        <span class="bg-pink-500 text-white text-xs font-medium px-2 py-1 rounded-full">👕 Fashion</span>
+                    </div>
+                    <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm" data-event="click:editItem">
+                            <i class="fas fa-pencil text-gray-600 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">Prada Saffiano Leather Bag</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">Timeless elegant handbag crafted from premium Saffiano leather with gold-tone hardware.</p>
+                    
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="text-2xl font-bold text-primary-500">$2,390</div>
+                        <div class="flex items-center space-x-1">
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                                <i class="fas fa-share text-gray-500 text-sm"></i>
+                            </button>
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-500">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-sticky-note mr-1"></i>
+                        Available in black and cream
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wishlist Item Card 3 -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all duration-200 group" data-mock="true" draggable="true">
+                <div class="relative">
+                    <!-- Modern ergonomic office chair in a bright workspace -->
+                    <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300" alt="Ergonomic office chair" class="w-full h-48 object-cover" data-mock-image="true" />
+                    <div class="absolute top-3 left-3">
+                        <span class="bg-green-500 text-white text-xs font-medium px-2 py-1 rounded-full">🏠 Home</span>
+                    </div>
+                    <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm" data-event="click:editItem">
+                            <i class="fas fa-pencil text-gray-600 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">Herman Miller Aeron Chair</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">Revolutionary ergonomic office chair with breathable mesh and adjustable lumbar support.</p>
+                    
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="text-2xl font-bold text-primary-500">$1,395</div>
+                        <div class="flex items-center space-x-1">
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                                <i class="fas fa-share text-gray-500 text-sm"></i>
+                            </button>
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-500">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-sticky-note mr-1"></i>
+                        Size B - Graphite color preferred
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wishlist Item Card 4 -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all duration-200 group" data-mock="true" draggable="true">
+                <div class="relative">
+                    <!-- Stack of hardcover books with reading glasses -->
+                    <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300" alt="Book collection" class="w-full h-48 object-cover" data-mock-image="true" />
+                    <div class="absolute top-3 left-3">
+                        <span class="bg-purple-500 text-white text-xs font-medium px-2 py-1 rounded-full">📚 Books</span>
+                    </div>
+                    <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm" data-event="click:editItem">
+                            <i class="fas fa-pencil text-gray-600 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">Design Systems Handbook</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">Comprehensive guide to creating and maintaining design systems for modern digital products.</p>
+                    
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="text-2xl font-bold text-primary-500">$89.99</div>
+                        <div class="flex items-center space-x-1">
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                                <i class="fas fa-share text-gray-500 text-sm"></i>
+                            </button>
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-500">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-sticky-note mr-1"></i>
+                        Also available as e-book
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wishlist Item Card 5 -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all duration-200 group" data-mock="true" draggable="true">
+                <div class="relative">
+                    <!-- Latest iPhone model in elegant product shot -->
+                    <img src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300" alt="iPhone 15 Pro" class="w-full h-48 object-cover" data-mock-image="true" />
+                    <div class="absolute top-3 left-3">
+                        <span class="bg-primary-500 text-white text-xs font-medium px-2 py-1 rounded-full">📱 Electronics</span>
+                    </div>
+                    <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm" data-event="click:editItem">
+                            <i class="fas fa-pencil text-gray-600 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">iPhone 15 Pro Max</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">Latest flagship iPhone with titanium design, A17 Pro chip, and advanced camera system.</p>
+                    
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="text-2xl font-bold text-primary-500">$1,199</div>
+                        <div class="flex items-center space-x-1">
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                                <i class="fas fa-share text-gray-500 text-sm"></i>
+                            </button>
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-500">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-sticky-note mr-1"></i>
+                        256GB Natural Titanium
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wishlist Item Card 6 -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-all duration-200 group" data-mock="true" draggable="true">
+                <div class="relative">
+                    <!-- Vintage leather jacket on clothing rack -->
+                    <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300" alt="Leather jacket" class="w-full h-48 object-cover" data-mock-image="true" />
+                    <div class="absolute top-3 left-3">
+                        <span class="bg-pink-500 text-white text-xs font-medium px-2 py-1 rounded-full">👕 Fashion</span>
+                    </div>
+                    <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm" data-event="click:editItem">
+                            <i class="fas fa-pencil text-gray-600 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">AllSaints Leather Jacket</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">Classic black leather jacket with asymmetric zip and vintage-inspired details.</p>
+                    
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="text-2xl font-bold text-primary-500">$450</div>
+                        <div class="flex items-center space-x-1">
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                                <i class="fas fa-share text-gray-500 text-sm"></i>
+                            </button>
+                            <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-500">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-sticky-note mr-1"></i>
+                        Size M - check for sales
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_MAP )) -->
+
+        <!-- Empty State (hidden when items exist) -->
+        <div class="hidden text-center py-16" id="emptyState">
+            <div class="w-24 h-24 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-heart text-gray-400 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Your wishlist is empty</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">Start building your dream collection by adding items you love and want to remember.</p>
+            <button class="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-colors" data-event="click:openAddItemModal">
+                <i class="fas fa-plus mr-2"></i>Add Your First Item
+            </button>
+        </div>
+    </main>
+    <!-- @END_COMPONENT: MainContent -->
+
+    <!-- @COMPONENT: FloatingActionButton [add new item] -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <button class="w-14 h-14 bg-primary-500 hover:bg-primary-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group" data-event="click:openAddItemModal" data-implementation="Should open modal for adding new wishlist item">
+            <i class="fas fa-plus text-xl group-hover:scale-110 transition-transform"></i>
+        </button>
+    </div>
+    <!-- @END_COMPONENT: FloatingActionButton -->
+
+    <!-- @COMPONENT: AddItemModal [form for new items] -->
+    <div id="addItemModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden" data-state="isAddModalOpen:boolean = false">
+        <div class="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl transform transition-all duration-300">
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Add New Item</h3>
+                <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" data-event="click:closeAddModal">
+                    <i class="fas fa-times text-gray-500"></i>
+                </button>
+            </div>
+            
+            <form class="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-80px)]" data-event="submit:handleAddItem">
+                <!-- Image Upload -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Image</label>
+                    <div class="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
+                        <div class="w-12 h-12 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-camera text-gray-400 text-lg"></i>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Tap to upload an image</p>
+                        <input type="file" accept="image/*" capture="environment" class="hidden" id="imageInput" data-implementation="Use File API to handle image uploads">
+                        <button type="button" class="text-primary-500 text-sm font-medium" onclick="document.getElementById('imageInput').click()">Choose from device</button>
+                    </div>
+                </div>
+                
+                <!-- Item Title -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="itemTitle">Title</label>
+                    <input type="text" id="itemTitle" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" placeholder="What do you want?" required>
+                </div>
+                
+                <!-- Category -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+                    <select class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                        <option>📱 Electronics</option>
+                        <option>👕 Fashion</option>
+                        <option>🏠 Home</option>
+                        <option>📚 Books</option>
+                        <option>➕ Create New Category</option>
+                    </select>
+                </div>
+                
+                <!-- Price -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="itemPrice">Price</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <input type="number" step="0.01" id="itemPrice" class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="itemDescription">Description</label>
+                    <textarea id="itemDescription" rows="3" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none" placeholder="Why do you want this?"></textarea>
+                </div>
+                
+                <!-- Notes -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="itemNotes">Notes</label>
+                    <input type="text" id="itemNotes" class="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" placeholder="Size, color, store, etc.">
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex space-x-3 pt-4">
+                    <button type="button" class="flex-1 px-4 py-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg font-medium transition-colors" data-event="click:closeAddModal">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors">Add Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: AddItemModal -->
+
+    <!-- @COMPONENT: CategoryManagerModal [manage categories] -->
+    <div id="categoryModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl">
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Manage Categories</h3>
+                <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" data-event="click:closeCategoryModal">
+                    <i class="fas fa-times text-gray-500"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+                <div class="space-y-4">
+                    <!-- Default Categories -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Default Categories</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-xl">📱</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">Electronics</span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">(4 items)</span>
+                                </div>
+                                <button class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" data-event="click:editCategory">
+                                    <i class="fas fa-pencil text-sm"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-xl">👕</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">Fashion</span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">(3 items)</span>
+                                </div>
+                                <button class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" data-event="click:editCategory">
+                                    <i class="fas fa-pencil text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Custom Categories -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Custom Categories</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-xl">🎮</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">Gaming</span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">(2 items)</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" data-event="click:editCategory">
+                                        <i class="fas fa-pencil text-sm"></i>
+                                    </button>
+                                    <button class="text-red-500 hover:text-red-700" data-event="click:deleteCategory">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Add New Category -->
+                    <button class="w-full p-3 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg text-gray-500 dark:text-gray-400 hover:border-primary-400 hover:text-primary-500 transition-colors" data-event="click:openNewCategoryForm">
+                        <i class="fas fa-plus mr-2"></i>Add New Category
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: CategoryManagerModal -->
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        (function() {
+            // Theme Toggle Functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            
+            // Initialize theme from localStorage or default to light
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            body.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                body.classList.add('dark');
+            }
+            
+            themeToggle.addEventListener('click', function() {
+                const isDark = body.classList.contains('dark');
+                
+                if (isDark) {
+                    body.classList.remove('dark');
+                    body.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    body.classList.add('dark');
+                    body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+            
+            // Modal Management
+            function openModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            
+            function closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+            
+            // Add Item Modal
+            const addButton = document.querySelector('[data-event="click:openAddItemModal"]');
+            const addModal = document.getElementById('addItemModal');
+            const closeAddButton = document.querySelector('[data-event="click:closeAddModal"]');
+            
+            if (addButton) {
+                addButton.addEventListener('click', () => openModal('addItemModal'));
+            }
+            
+            if (closeAddButton) {
+                closeAddButton.addEventListener('click', () => closeModal('addItemModal'));
+            }
+            
+            // Category Manager Modal
+            const categoryButton = document.querySelector('[data-event="click:openCategoryManager"]');
+            const categoryModal = document.getElementById('categoryModal');
+            const closeCategoryButton = document.querySelector('[data-event="click:closeCategoryModal"]');
+            
+            if (categoryButton) {
+                categoryButton.addEventListener('click', () => openModal('categoryModal'));
+            }
+            
+            if (closeCategoryButton) {
+                closeCategoryButton.addEventListener('click', () => closeModal('categoryModal'));
+            }
+            
+            // Close modals when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+                    const modals = ['addItemModal', 'categoryModal'];
+                    modals.forEach(modalId => {
+                        if (!document.getElementById(modalId).classList.contains('hidden')) {
+                            closeModal(modalId);
+                        }
+                    });
+                }
+            });
+            
+            // Drag and Drop Visual Feedback
+            const wishlistItems = document.querySelectorAll('[draggable="true"]');
+            wishlistItems.forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    this.style.opacity = '0.5';
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                
+                item.addEventListener('dragend', function(e) {
+                    this.style.opacity = '1';
+                });
+            });
+            
+            // Form Submission Placeholder
+            const addItemForm = document.querySelector('form[data-event="submit:handleAddItem"]');
+            if (addItemForm) {
+                addItemForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    // TODO: Implement form submission logic
+                    console.log('Add item form submitted');
+                    closeModal('addItemModal');
+                });
+            }
+        })();
+    </script>
+
+</body>
+</html>
